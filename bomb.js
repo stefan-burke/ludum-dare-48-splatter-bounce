@@ -51,9 +51,9 @@ class Bomb {
     }
 
     let cornerDistance_sq =
-      (x - baddy.width / 2) ^ (2 + (y - baddy.height / 2)) ^ 2;
+      Math.pow(x - baddy.width / 2, 2) + Math.pow(y - baddy.height / 2, 2);
 
-    return cornerDistance_sq <= (this.radius ^ 2);
+    return cornerDistance_sq <= Math.pow(this.radius, 2);
   }
 
   lightenDarkenColor(col, amt) {

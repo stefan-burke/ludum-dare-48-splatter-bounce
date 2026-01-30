@@ -89,16 +89,20 @@ let Character = class {
     return speed;
   }
   movement() {
-    let newBottom = this.bottom - this.yke;
-    let down =
-      !isWall(this.left, newBottom) && !isWall(this.right, newBottom);
-    let newLeft = this.left - this.speed("left", !down);
-    let newRight = this.right + this.speed("right", !down);
+    let speed = this.baseSpeed;
+
+    // Use rectHitsWall for full-body collision instead of point checks.
+    // This prevents the character from slipping between blocks.
+    let downHit = rectHitsWall(this.left, this.bottom - this.yke, this.right, this.bottom - this.yke + 1);
+    let upHit = rectHitsWall(this.left, this.top - 1, this.right, this.top);
+    let leftHit = rectHitsWall(this.left - speed, this.top, this.left - speed + 1, this.bottom);
+    let rightHit = rectHitsWall(this.right + speed - 1, this.top, this.right + speed, this.bottom);
+
     return {
-      down: down,
-      up: !isWall(this.left, this.top) && !isWall(this.right, this.top),
-      left: !isWall(newLeft, this.top) && !isWall(newLeft, this.middle),
-      right: !isWall(newRight, this.top) && !isWall(newRight, this.middle),
+      down: !downHit,
+      up: !upHit,
+      left: !leftHit,
+      right: !rightHit,
     };
   }
   resetPosition(minDistanceFromPlayer) {

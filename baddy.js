@@ -55,12 +55,7 @@ class Baddy extends Character {
     this.y = oldY + this.direction.y * speed;
 
     let stuck = false;
-    if (
-      isWall(this.left, this.top) ||
-      isWall(this.right, this.top) ||
-      isWall(this.left, this.bottom) ||
-      isWall(this.right, this.bottom)
-    ) {
+    if (rectHitsWall(this.left, this.top, this.right, this.bottom)) {
       this.x = oldX;
       this.y = oldY;
       this.direction = pickRandom(DIRECTIONS);

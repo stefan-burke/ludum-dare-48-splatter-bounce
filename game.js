@@ -13,10 +13,33 @@ const debugText = document.getElementById("debug_text").getContext("2d");
 overlay.fillStyle = "white";
 
 function isWall(x, y) {
+  if (x < 0 || x >= 512 || y < 0 || y >= 512) return true;
   let yAvg = Math.floor(y / BLOCK_SIZE);
   let xAvg = Math.floor(x / BLOCK_SIZE);
   let row = currentLevel[yAvg];
   return ((row && row[xAvg]) || "1") !== "0";
+}
+
+// Check if a rectangle overlaps any wall tiles.
+// Takes the bounding box edges (exclusive on right/bottom by 1px to avoid
+// triggering on exact block boundaries when flush against a wall).
+function rectHitsWall(left, top, right, bottom) {
+  // Clamp to be safe
+  let l = Math.max(0, Math.floor(left / BLOCK_SIZE));
+  let r = Math.max(0, Math.floor((right - 1) / BLOCK_SIZE));
+  let t = Math.max(0, Math.floor(top / BLOCK_SIZE));
+  let b = Math.max(0, Math.floor((bottom - 1) / BLOCK_SIZE));
+
+  // Bounds check
+  if (left < 0 || right > 512 || top < 0 || bottom > 512) return true;
+
+  for (let row = t; row <= b; row++) {
+    for (let col = l; col <= r; col++) {
+      let levelRow = currentLevel[row];
+      if (!levelRow || (levelRow[col] || "1") !== "0") return true;
+    }
+  }
+  return false;
 }
 
 function overlapping(obj1, obj2) {
@@ -171,13 +194,21 @@ function shiftCanvas(canvas) {
 
 let currentLevel = null;
 let baddies = [];
+
+let isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
 window.onload = function () {
   overlay.font = "30px Sans-Serif";
   overlay.fillText(`you are the white square!`, 20, 40);
   overlay.fillText(`yellow square: +20`, 20, 80);
   overlay.fillText(`bad guy: -1`, 20, 120);
-  overlay.fillText(`move: wasd / arrows`, 20, 160);
-  overlay.fillText(`bomb: space (-3)`, 20, 200);
+  if (isMobile) {
+    overlay.fillText(`use buttons below`, 20, 160);
+    overlay.fillText(`bomb costs -3`, 20, 200);
+  } else {
+    overlay.fillText(`move: wasd / arrows`, 20, 160);
+    overlay.fillText(`bomb: space (-3)`, 20, 200);
+  }
   overlay.fillText(`rounds are 30 secs`, 20, 240);
   overlay.fillText(`starting in 10 secs!`, 20, 280);
   setTimeout(restart, 10000);
