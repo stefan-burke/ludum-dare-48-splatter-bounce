@@ -72,8 +72,61 @@ addEventListener("keyup", function (event) {
   delete keysDown[event.key];
 });
 
+// Touch controls
+let touchKeys = {};
+
+function setupTouchButton(buttonId, keyName) {
+  let btn = document.getElementById(buttonId);
+  if (!btn) return;
+
+  function press(e) {
+    e.preventDefault();
+    touchKeys[keyName] = true;
+    btn.classList.add("active");
+  }
+
+  function release(e) {
+    e.preventDefault();
+    if (
+      keyName === "up" &&
+      !player.pausedMidAirJump &&
+      player.yke != 0
+    ) {
+      player.pausedMidAirJump = Date.now();
+    }
+    delete touchKeys[keyName];
+    btn.classList.remove("active");
+  }
+
+  btn.addEventListener("touchstart", press, { passive: false });
+  btn.addEventListener("touchend", release, { passive: false });
+  btn.addEventListener("touchcancel", release, { passive: false });
+
+  // Also handle mouse for testing on desktop
+  btn.addEventListener("mousedown", press);
+  btn.addEventListener("mouseup", release);
+  btn.addEventListener("mouseleave", release);
+}
+
+window.addEventListener("load", function () {
+  setupTouchButton("btn-left", "left");
+  setupTouchButton("btn-right", "right");
+  setupTouchButton("btn-jump", "up");
+  setupTouchButton("btn-bomb", "fire");
+});
+
 function keyDown(search) {
-  return Object.keys(keysDown).filter((k) => search.includes(k)).length > 0;
+  // Check keyboard keys
+  let keyboard = Object.keys(keysDown).filter((k) => search.includes(k)).length > 0;
+  if (keyboard) return true;
+
+  // Check touch keys - map touch key names to MOVEMENT_KEYS entries
+  for (let direction in MOVEMENT_KEYS) {
+    if (MOVEMENT_KEYS[direction] === search && touchKeys[direction]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function input() {

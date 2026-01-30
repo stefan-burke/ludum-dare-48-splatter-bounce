@@ -2,23 +2,154 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>splatter bounce</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 100%;
+        height: 100%;
+        background: #111;
+        overflow: hidden;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      #game-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        max-width: 512px;
+        margin: 0 auto;
+      }
+      #viewport {
+        position: relative;
+        width: 100%;
+        flex: 1 1 auto;
+        background: black;
+        min-height: 0;
+      }
+      #viewport canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #touch-controls {
+        display: none;
+        flex: 0 0 auto;
+        width: 100%;
+        padding: 10px;
+        background: #222;
+        gap: 10px;
+      }
+      #touch-controls .controls-row {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        justify-content: center;
+      }
+      #touch-controls button {
+        flex: 1;
+        max-width: 160px;
+        height: 70px;
+        border: 2px solid #555;
+        border-radius: 12px;
+        background: #333;
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+      #touch-controls button:active,
+      #touch-controls button.active {
+        background: #555;
+        border-color: #888;
+      }
+      #btn-jump {
+        background: #1a4a1a !important;
+        border-color: #2a7a2a !important;
+      }
+      #btn-jump:active, #btn-jump.active {
+        background: #2a7a2a !important;
+        border-color: #3a9a3a !important;
+      }
+      #btn-bomb {
+        background: #4a1a1a !important;
+        border-color: #7a2a2a !important;
+      }
+      #btn-bomb:active, #btn-bomb.active {
+        background: #7a2a2a !important;
+        border-color: #9a3a3a !important;
+      }
+      #debug-controls {
+        padding: 5px 10px;
+        background: #111;
+        color: #666;
+        font-size: 12px;
+      }
+      #debug-controls input {
+        width: 40px;
+        background: #222;
+        color: #666;
+        border: 1px solid #333;
+      }
+      /* Show touch controls on touch devices */
+      @media (pointer: coarse) {
+        #touch-controls {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        #debug-controls {
+          display: none;
+        }
+      }
+      /* Desktop: constrain to 512x512 */
+      @media (pointer: fine) {
+        #game-container {
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        #viewport {
+          width: 512px;
+          height: 512px;
+          flex: 0 0 512px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="viewport" style="position: relative; width: 512px; height: 512px; background: black;">
-      <canvas id="splatter" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-      <canvas id="bombs" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-      <canvas id="bg" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-      <canvas id="fg" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-      <canvas id="overlay" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-      <canvas id="debug_text" style="position: absolute; width: 512px; height: 512px;" width="512" height="512"></canvas>
-    </div>
-    <ul>
-      <li>
+    <div id="game-container">
+      <div id="viewport">
+        <canvas id="splatter" width="512" height="512"></canvas>
+        <canvas id="bombs" width="512" height="512"></canvas>
+        <canvas id="bg" width="512" height="512"></canvas>
+        <canvas id="fg" width="512" height="512"></canvas>
+        <canvas id="overlay" width="512" height="512"></canvas>
+        <canvas id="debug_text" width="512" height="512"></canvas>
+      </div>
+      <div id="touch-controls">
+        <div class="controls-row">
+          <button id="btn-left">&larr;</button>
+          <button id="btn-jump">&uarr; JUMP</button>
+          <button id="btn-right">&rarr;</button>
+        </div>
+        <div class="controls-row">
+          <button id="btn-bomb">BOMB</button>
+        </div>
+      </div>
+      <div id="debug-controls">
         <strong>fps:</strong>
         <input type="text" value="60" type="number" id="debug_fps" />
-      </li>
-    </ul>
+      </div>
+    </div>
     <script src="constants.js"></script>
     <script src="level.js"></script>
     <script src="player.js"></script>
