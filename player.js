@@ -40,7 +40,7 @@ player.gravity = function () {
 const MOVEMENT_KEYS = {
   left: ["ArrowLeft", "a"],
   right: ["ArrowRight", "d"],
-  up: ["UpArrow", "w"],
+  up: ["ArrowUp", "w"],
   down: ["ArrowDown", "s"],
   fire: [" "]
 };
@@ -79,14 +79,21 @@ function setupTouchButton(buttonId, keyName) {
   let btn = document.getElementById(buttonId);
   if (!btn) return;
 
+  let pressed = false;
+
   function press(e) {
     e.preventDefault();
+    e.stopPropagation();
+    if (pressed) return;
+    pressed = true;
     touchKeys[keyName] = true;
     btn.classList.add("active");
   }
 
   function release(e) {
     e.preventDefault();
+    if (!pressed) return;
+    pressed = false;
     if (
       keyName === "up" &&
       !player.pausedMidAirJump &&
@@ -98,11 +105,18 @@ function setupTouchButton(buttonId, keyName) {
     btn.classList.remove("active");
   }
 
+  // Touch events (primary on mobile)
   btn.addEventListener("touchstart", press, { passive: false });
   btn.addEventListener("touchend", release, { passive: false });
   btn.addEventListener("touchcancel", release, { passive: false });
 
-  // Also handle mouse for testing on desktop
+  // Pointer events as fallback for browsers that may not fire touch events on buttons
+  btn.addEventListener("pointerdown", press, { passive: false });
+  btn.addEventListener("pointerup", release, { passive: false });
+  btn.addEventListener("pointercancel", release, { passive: false });
+  btn.addEventListener("pointerleave", release, { passive: false });
+
+  // Mouse events for desktop testing
   btn.addEventListener("mousedown", press);
   btn.addEventListener("mouseup", release);
   btn.addEventListener("mouseleave", release);
@@ -120,9 +134,16 @@ function keyDown(search) {
   let keyboard = Object.keys(keysDown).filter((k) => search.includes(k)).length > 0;
   if (keyboard) return true;
 
-  // Check touch keys - map touch key names to MOVEMENT_KEYS entries
+  // Check touch keys - find which direction this search corresponds to
   for (let direction in MOVEMENT_KEYS) {
-    if (MOVEMENT_KEYS[direction] === search && touchKeys[direction]) {
+    if (touchKeys[direction] && MOVEMENT_KEYS[direction] === search) {
+      return true;
+    }
+  }
+  // Fallback: match by checking if the search array is the same set of keys
+  for (let direction in MOVEMENT_KEYS) {
+    if (touchKeys[direction] && search.length === MOVEMENT_KEYS[direction].length &&
+        search.every(function(k, i) { return k === MOVEMENT_KEYS[direction][i]; })) {
       return true;
     }
   }

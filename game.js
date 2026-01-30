@@ -210,6 +210,43 @@ window.onload = function () {
     overlay.fillText(`bomb: space (-3)`, 20, 200);
   }
   overlay.fillText(`rounds are 30 secs`, 20, 240);
-  overlay.fillText(`starting in 10 secs!`, 20, 280);
-  setTimeout(restart, 10000);
+
+  let started = false;
+  let startTimer = setTimeout(function () {
+    if (!started) {
+      started = true;
+      restart();
+    }
+  }, 10000);
+
+  function startGame() {
+    if (!started) {
+      started = true;
+      clearTimeout(startTimer);
+      restart();
+    }
+  }
+
+  if (isMobile) {
+    overlay.fillText(`tap anywhere to start!`, 20, 280);
+    document.getElementById("overlay").addEventListener("touchstart", function handler(e) {
+      e.preventDefault();
+      document.getElementById("overlay").removeEventListener("touchstart", handler);
+      startGame();
+    }, { passive: false });
+    // Also allow starting via touch control buttons
+    var touchControls = document.getElementById("touch-controls");
+    if (touchControls) {
+      touchControls.addEventListener("touchstart", function handler() {
+        touchControls.removeEventListener("touchstart", handler);
+        startGame();
+      }, { once: true });
+    }
+  } else {
+    overlay.fillText(`starting in 10 secs!`, 20, 280);
+    addEventListener("keydown", function handler() {
+      removeEventListener("keydown", handler);
+      startGame();
+    });
+  }
 };

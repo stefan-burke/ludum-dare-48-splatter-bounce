@@ -74,9 +74,6 @@ let Character = class {
   get bottom() {
     return this.y + this.height;
   }
-  get speed() {
-    return this.baseSpeed;
-  }
   speed(direction, onGround, increase = false) {
     let multiplier = (this.startedMovement[direction] || 0) + 1;
     if (increase && onGround) this.startedMovement[direction] = multiplier;
